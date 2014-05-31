@@ -1,0 +1,14 @@
+.DS_Store
+/src/
+/bin/
+/doc/
+/target/
+/examples/
+/.rust
+rusti.sh
+.travis.yml
+cargo-lite.conf
+.symlink-info
+*.swp
+
+Cargo.toml

@@ -1,2 +1,2 @@
-rust_pong
+rust-pong
 =========

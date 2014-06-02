@@ -16,7 +16,7 @@ mod logic;
 mod glutils;
 mod renderer;
 
-static WND_TITLE: &'static str = "rust-pong :: FPS: ";
+static WND_TITLE: &'static str = "rust-pong";
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
@@ -58,7 +58,7 @@ fn main() {
 		// Main logic
 		glfw.poll_events();
 		for (_, event) in glfw::flush_messages(&events) {
-			handle_window_event(&window, event);
+			handle_window_event(&window, event, &mut game_state);
 		}
 		let now_time =  time::precise_time_ns();
 		let delta_time = ((now_time-start_time) as f32)*ns_to_s;
@@ -75,6 +75,11 @@ fn main() {
 		if frames_interval > 3. {
 			let mut title = String::new();
 			title.push_str(WND_TITLE.to_str().as_slice());
+			title.push_str(" :: Score ");
+			title.push_str(game_state.p1_score.to_str().as_slice());
+			title.push_str("x");
+			title.push_str(game_state.p2_score.to_str().as_slice());
+			title.push_str(" :: FPS: ");
 			title.push_str(
 				((frames as f32)/frames_interval).to_str().as_slice());
 			window.set_title(title.as_slice());
@@ -84,8 +89,21 @@ fn main() {
 	}
 }
 
-fn handle_window_event(window: &glfw::Window, event: glfw::WindowEvent) {
+fn handle_window_event(window: &glfw::Window,
+		event: glfw::WindowEvent, gs: &mut ::logic::GameState) {
 	match event {
+		glfw::KeyEvent(glfw::KeyW, _, glfw::Press, _) => {
+			gs.pad_moving_up = true;
+		}
+		glfw::KeyEvent(glfw::KeyW, _, glfw::Release, _) => {
+			gs.pad_moving_up = false;
+		}
+		glfw::KeyEvent(glfw::KeyS, _, glfw::Press, _) => {
+			gs.pad_moving_down = true;
+		}
+		glfw::KeyEvent(glfw::KeyS, _, glfw::Release, _) => {
+			gs.pad_moving_down = false;
+		}
 		glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _) => {
 			window.set_should_close(true);
 		}

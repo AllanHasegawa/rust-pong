@@ -67,7 +67,6 @@ fn main() {
 		start_time = now_time;
 		game_state.update(delta_time);
 		game_state.random_value = rng.gen_range(0.0, 1.0) as f32;
-		println!("{}", game_state.random_value);
 
 		// Rendering
 		renderer_state.update(delta_time, &game_state);

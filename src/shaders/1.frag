@@ -104,6 +104,9 @@ void main() {
 			&& quad_coord.y > p2_pady-PAD_SIZE
 			&& quad_coord.y < p2_pady+PAD_SIZE) {
 		color += vec3(1,1,1);//vec3(0.5,0,0);
+	} else {
+		// background texture
+		color += vec3(sin((quad_coord.x-0.01) * 10), 0, 0);
 	}
 
 	vec3 sepia = vec3(112.0 / 255.0, 66.0 / 255.0, 20.0 / 255.0);

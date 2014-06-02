@@ -5,7 +5,9 @@ extern crate glfw;
 extern crate gl;
 extern crate time;
 extern crate cgmath;
+extern crate rand;
 
+use rand::Rng;
 
 use glfw::Context;
 use gl::types::*;
@@ -24,7 +26,6 @@ fn start(argc: int, argv: **u8) -> int {
 }
 
 fn main() {
-
 	// Init Game State
 	let mut game_state = ::logic::GameState::new();
 
@@ -54,6 +55,7 @@ fn main() {
 	let mut frames = 0;
 	let mut frames_interval: f32 = 0.;
 	
+	let mut rng = rand::isaac::IsaacRng::new_unseeded();
 	while !window.should_close() {
 		// Main logic
 		glfw.poll_events();
@@ -64,9 +66,11 @@ fn main() {
 		let delta_time = ((now_time-start_time) as f32)*ns_to_s;
 		start_time = now_time;
 		game_state.update(delta_time);
+		game_state.random_value = rng.gen_range(0.0, 1.0) as f32;
+		println!("{}", game_state.random_value);
 
 		// Rendering
-		renderer_state.update(&game_state);
+		renderer_state.update(delta_time, &game_state);
 		gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
 		window.swap_buffers();
 

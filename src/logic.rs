@@ -10,6 +10,7 @@ pub struct GameState {
 	pub pad_moving_up: bool,
 	pub p1_score: i32,
 	pub p2_score: i32,
+	pub random_value: f32,
 }
 
 fn min(v1: f32, v2: f32) -> f32 {
@@ -39,6 +40,7 @@ impl GameState {
 			pad_moving_up: false,
 			p1_score: 0,
 			p2_score: 0,
+			random_value: 0.0,
 		}
 	}
 

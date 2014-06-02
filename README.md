@@ -15,3 +15,7 @@ A VERY simple Pong-like game made in Rust Language with OpenGL/GLFW.
 
 * `W,S` controls the player paddle?
 * Make sure the directory `src/shaders` is inside the `bin` (like, `bin/shaders`, the code will try to open `shaders/0.vert` at runtime)
+
+# Screenshot
+
+![ScreenShot](http://i.imgur.com/PgAk2wX.png)

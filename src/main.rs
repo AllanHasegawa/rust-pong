@@ -10,8 +10,9 @@ use gl::types::*;
 use std::mem;
 use std::ptr;
 
-mod glutils;
 mod logic;
+mod glutils;
+mod renderer;
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
@@ -20,8 +21,11 @@ fn start(argc: int, argv: **u8) -> int {
 
 fn main() {
 
+	// Init Game State
 	let mut game_state = ::logic::GameState::new();
 
+
+	// Init Window/IO
 	let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
 	glfw.window_hint(glfw::ContextVersion(3, 2));
@@ -35,54 +39,12 @@ fn main() {
 
 	gl::load_with(|s| glfw.get_proc_address(s));
 
-	let program = ::glutils::load_program("shaders/0.vert", "shaders/0.frag");
 
-    let mut vao = 0;
-    let mut vbo = 0;
-
-	let mut p1_pady_loc: GLint;
-	let mut p2_pady_loc: GLint;
-
-	unsafe {
-		gl::GenVertexArrays(1, &mut vao);
-		gl::BindVertexArray(vao);
-
-		gl::GenBuffers(1, &mut vbo);
-		gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-		gl::BufferData(gl::ARRAY_BUFFER,
-			(::glutils::VERTEX_DATA.len()
-				* mem::size_of::<GLfloat>()) as GLsizeiptr,
-			mem::transmute(&::glutils::VERTEX_DATA[0]),
-			gl::STATIC_DRAW);
-
-		gl::UseProgram(program);
-		"out_color".with_c_str(
-			|ptr| gl::BindFragDataLocation(program, 0, ptr));
+	// Init OpenGL
+	let renderer_state = ::renderer::RendererState::new();
 
 
-		let pos_attr = 
-			"position".with_c_str(|ptr| gl::GetAttribLocation(program, ptr));
-		gl::EnableVertexAttribArray(pos_attr as GLuint);
-		gl::VertexAttribPointer(pos_attr as GLuint, 2, gl::FLOAT,
-			gl::FALSE as GLboolean,
-			4*4, ptr::null()); // [TODO] sizeof(GLfloat) ?
-
-		let quad_coord_loc = 
-			"quad_coord_in".with_c_str(
-				|ptr| gl::GetAttribLocation(program, ptr));
-		gl::EnableVertexAttribArray(quad_coord_loc as GLuint);
-		gl::VertexAttribPointer(quad_coord_loc as GLuint, 2, gl::FLOAT,
-			gl::FALSE as GLboolean,
-			4*4, ptr::null().offset(2*4)); // [TODO] sizeof(GLfloat) ?
-
-		p1_pady_loc = "p1_pady".with_c_str(
-				|ptr| gl::GetUniformLocation(program, ptr));
-		gl::Uniform1f(p1_pady_loc, game_state.p1_pady);
-		p2_pady_loc = "p2_pady".with_c_str(
-				|ptr| gl::GetUniformLocation(program, ptr));
-		gl::Uniform1f(p2_pady_loc, game_state.p2_pady);
-	}
-
+	// Start Main Loop
 	let mut start_time = time::precise_time_ns();
 	let ns_to_s: f32 = 1.0/1000000000.0;
 	let mut frames = 0;
@@ -102,8 +64,7 @@ fn main() {
 		let delta_time = ((now_time-start_time) as f32)*ns_to_s;
 		start_time = now_time;
 		game_state.update(delta_time);
-		gl::Uniform1f(p1_pady_loc, game_state.p1_pady);
-		gl::Uniform1f(p2_pady_loc, game_state.p2_pady);
+		renderer_state.update(&game_state);
 
 		frames += 1;
 		frames_interval += delta_time;
@@ -118,11 +79,7 @@ fn main() {
 		}
 	}
 
-	gl::DeleteProgram(program);
-	unsafe {
-		gl::DeleteBuffers(1, &vbo);
-		gl::DeleteVertexArrays(1, &vao);
-	}
+	renderer_state.destroy();
 }
 
 fn handle_window_event(window: &glfw::Window, event: glfw::WindowEvent) {

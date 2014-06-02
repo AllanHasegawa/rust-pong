@@ -9,6 +9,7 @@ A VERY simple Pong-like game made in Rust Language with OpenGL/GLFW.
 * glfw-rs (https://github.com/bjz/glfw-rs)
 * gl-rs (https://github.com/bjz/gl-rs)
 * cgmath-rs (https://github.com/bjz/cgmath-rs)
+* Makefile from https://github.com/bvssvni/rust-empty
 
 # Playing
 

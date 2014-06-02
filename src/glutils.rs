@@ -10,10 +10,21 @@ use std::io::BufferedReader;
 
 use gl::types::*;
 
-pub static VERTEX_DATA: [GLfloat, ..6] = [
-	     0.0,  0.5,
-	     0.5, -0.5,
-	    -0.5, -0.5
+/*
+ * 0 --- 3
+ * |\    |
+ * | \   |
+ * |  \  |
+ * |   \ |
+ * |    \|
+ * 1 --- 2
+ */
+
+pub static VERTEX_DATA: [GLfloat, ..16] = [
+	-1.0,  1.0, 0.0, 1.0, //0
+	-1.0, -1.0, 0.0, 0.0, //1
+	 1.0,  1.0, 1.0, 1.0, //3
+	 1.0, -1.0, 1.0, 0.0, //2
 ];
 
 pub fn compile_shader(src: &str, ty: GLenum) -> GLuint {

@@ -53,11 +53,22 @@ fn main() {
 		gl::UseProgram(program);
 		"out_color".with_c_str(
 			|ptr| gl::BindFragDataLocation(program, 0, ptr));
+
+
 		let pos_attr = 
 			"position".with_c_str(|ptr| gl::GetAttribLocation(program, ptr));
 		gl::EnableVertexAttribArray(pos_attr as GLuint);
 		gl::VertexAttribPointer(pos_attr as GLuint, 2, gl::FLOAT,
-			gl::FALSE as GLboolean, 0, ptr::null());
+			gl::FALSE as GLboolean,
+			4*4, ptr::null()); // [TODO] sizeof(GLfloat) ?
+
+		let quad_coord_attr = 
+			"quad_coord_in".with_c_str(
+				|ptr| gl::GetAttribLocation(program, ptr));
+		gl::EnableVertexAttribArray(quad_coord_attr as GLuint);
+		gl::VertexAttribPointer(quad_coord_attr as GLuint, 2, gl::FLOAT,
+			gl::FALSE as GLboolean,
+			4*4, ptr::null().offset(2*4)); // [TODO] sizeof(GLfloat) ?
 	}
 	
 	while !window.should_close() {
@@ -68,7 +79,8 @@ fn main() {
 		gl::ClearColor(0.3, 0.3, 0.3, 1.0);
 		gl::Clear(gl::COLOR_BUFFER_BIT);
 
-		gl::DrawArrays(gl::TRIANGLES, 0, 3);
+		//gl::DrawArrays(gl::TRIANGLES, 0, 3);
+		gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
 
 		// Swap buffers
 		window.swap_buffers();

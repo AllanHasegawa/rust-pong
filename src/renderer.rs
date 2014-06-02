@@ -10,6 +10,7 @@ use std::ptr;
 pub struct RendererState {
 	pub p1_pady_loc: GLint,
 	pub p2_pady_loc: GLint,
+	pub ball_center_loc: GLint,
 	pub program: GLuint,
 	pub vao: GLuint,
 	pub vbo: GLuint,
@@ -24,6 +25,7 @@ impl RendererState {
 
 		let mut p1_pady_loc: GLint;
 		let mut p2_pady_loc: GLint;
+		let mut ball_center_loc: GLint;
 
 		unsafe {
 			gl::GenVertexArrays(1, &mut vao);
@@ -63,11 +65,15 @@ impl RendererState {
 			p2_pady_loc = "p2_pady".with_c_str(
 				|ptr| gl::GetUniformLocation(program, ptr));
 			gl::Uniform1f(p2_pady_loc, 0.0);
+			ball_center_loc = "ball_center".with_c_str(
+				|ptr| gl::GetUniformLocation(program, ptr));
+			gl::Uniform2f(ball_center_loc, 0.0, 0.0);
 		}
 
 		RendererState {
 			p1_pady_loc: p1_pady_loc,
 			p2_pady_loc: p2_pady_loc,
+			ball_center_loc: ball_center_loc,
 			program: program,
 			vao: vao,
 			vbo: vbo,
@@ -77,6 +83,8 @@ impl RendererState {
 	pub fn update(&self, gs: &::logic::GameState) {
 		gl::Uniform1f(self.p1_pady_loc, gs.p1_pady);
 		gl::Uniform1f(self.p2_pady_loc, gs.p2_pady);
+		gl::Uniform2f(self.ball_center_loc,
+			gs.ball_center.x, gs.ball_center.y);
 	}
 }
 

@@ -4,6 +4,8 @@ extern crate native;
 extern crate glfw;
 extern crate gl;
 extern crate time;
+extern crate cgmath;
+
 
 use glfw::Context;
 use gl::types::*;
@@ -13,6 +15,8 @@ use std::ptr;
 mod logic;
 mod glutils;
 mod renderer;
+
+static WND_TITLE: &'static str = "rust-pong :: FPS: ";
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
@@ -32,7 +36,7 @@ fn main() {
     glfw.window_hint(glfw::OpenglForwardCompat(true));
 	
 	let (window, events) = glfw.create_window(800, 600,
-		"Title :)", glfw::Windowed).expect("Failed to create GLFW window.");
+		WND_TITLE, glfw::Windowed).expect("Failed to create GLFW window.");
 
 	window.set_key_polling(true);
 	window.make_current();
@@ -51,26 +55,26 @@ fn main() {
 	let mut frames_interval: f32 = 0.;
 	
 	while !window.should_close() {
+		// Main logic
 		glfw.poll_events();
 		for (_, event) in glfw::flush_messages(&events) {
 			handle_window_event(&window, event);
 		}
-		gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
-
-		// Swap buffers
-		window.swap_buffers();
-
 		let now_time =  time::precise_time_ns();
 		let delta_time = ((now_time-start_time) as f32)*ns_to_s;
 		start_time = now_time;
 		game_state.update(delta_time);
+
+		// Rendering
 		renderer_state.update(&game_state);
+		gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
+		window.swap_buffers();
 
 		frames += 1;
 		frames_interval += delta_time;
 		if frames_interval > 3. {
 			let mut title = String::new();
-			title.push_str("rust-pong :: FPS: ".to_str().as_slice());
+			title.push_str(WND_TITLE.to_str().as_slice());
 			title.push_str(
 				((frames as f32)/frames_interval).to_str().as_slice());
 			window.set_title(title.as_slice());

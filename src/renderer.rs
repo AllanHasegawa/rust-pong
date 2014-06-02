@@ -78,8 +78,10 @@ impl RendererState {
 		gl::Uniform1f(self.p1_pady_loc, gs.p1_pady);
 		gl::Uniform1f(self.p2_pady_loc, gs.p2_pady);
 	}
+}
 
-	pub fn destroy(&self) {
+impl Drop for RendererState {
+	fn drop(&mut self) {
 		gl::DeleteProgram(self.program);
 		unsafe {
 			gl::DeleteBuffers(1, &self.vbo);

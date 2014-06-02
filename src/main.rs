@@ -78,8 +78,6 @@ fn main() {
 			frames = 0;
 		}
 	}
-
-	renderer_state.destroy();
 }
 
 fn handle_window_event(window: &glfw::Window, event: glfw::WindowEvent) {

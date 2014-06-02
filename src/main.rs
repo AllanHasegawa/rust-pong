@@ -3,6 +3,7 @@
 extern crate native;
 extern crate glfw;
 extern crate gl;
+extern crate time;
 
 use glfw::Context;
 use gl::types::*;
@@ -10,6 +11,7 @@ use std::mem;
 use std::ptr;
 
 mod glutils;
+mod logic;
 
 #[start]
 fn start(argc: int, argv: **u8) -> int {
@@ -18,7 +20,7 @@ fn start(argc: int, argv: **u8) -> int {
 
 fn main() {
 
-	println!("Hello World!");
+	let mut game_state = ::logic::GameState::new();
 
 	let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
@@ -37,6 +39,9 @@ fn main() {
 
     let mut vao = 0;
     let mut vbo = 0;
+
+	let mut p1_pady_loc: GLint;
+	let mut p2_pady_loc: GLint;
 
 	unsafe {
 		gl::GenVertexArrays(1, &mut vao);
@@ -62,28 +67,55 @@ fn main() {
 			gl::FALSE as GLboolean,
 			4*4, ptr::null()); // [TODO] sizeof(GLfloat) ?
 
-		let quad_coord_attr = 
+		let quad_coord_loc = 
 			"quad_coord_in".with_c_str(
 				|ptr| gl::GetAttribLocation(program, ptr));
-		gl::EnableVertexAttribArray(quad_coord_attr as GLuint);
-		gl::VertexAttribPointer(quad_coord_attr as GLuint, 2, gl::FLOAT,
+		gl::EnableVertexAttribArray(quad_coord_loc as GLuint);
+		gl::VertexAttribPointer(quad_coord_loc as GLuint, 2, gl::FLOAT,
 			gl::FALSE as GLboolean,
 			4*4, ptr::null().offset(2*4)); // [TODO] sizeof(GLfloat) ?
+
+		p1_pady_loc = "p1_pady".with_c_str(
+				|ptr| gl::GetUniformLocation(program, ptr));
+		gl::Uniform1f(p1_pady_loc, game_state.p1_pady);
+		p2_pady_loc = "p2_pady".with_c_str(
+				|ptr| gl::GetUniformLocation(program, ptr));
+		gl::Uniform1f(p2_pady_loc, game_state.p2_pady);
 	}
+
+	let mut start_time = time::precise_time_ns();
+	let ns_to_s: f32 = 1.0/1000000000.0;
+	let mut frames = 0;
+	let mut frames_interval: f32 = 0.;
 	
 	while !window.should_close() {
 		glfw.poll_events();
 		for (_, event) in glfw::flush_messages(&events) {
 			handle_window_event(&window, event);
 		}
-		gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-		gl::Clear(gl::COLOR_BUFFER_BIT);
-
-		//gl::DrawArrays(gl::TRIANGLES, 0, 3);
 		gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
 
 		// Swap buffers
 		window.swap_buffers();
+
+		let now_time =  time::precise_time_ns();
+		let delta_time = ((now_time-start_time) as f32)*ns_to_s;
+		start_time = now_time;
+		game_state.update(delta_time);
+		gl::Uniform1f(p1_pady_loc, game_state.p1_pady);
+		gl::Uniform1f(p2_pady_loc, game_state.p2_pady);
+
+		frames += 1;
+		frames_interval += delta_time;
+		if frames_interval > 3. {
+			let mut title = String::new();
+			title.push_str("rust-pong :: FPS: ".to_str().as_slice());
+			title.push_str(
+				((frames as f32)/frames_interval).to_str().as_slice());
+			window.set_title(title.as_slice());
+			frames_interval = 0.;
+			frames = 0;
+		}
 	}
 
 	gl::DeleteProgram(program);
